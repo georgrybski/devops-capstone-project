@@ -1,3 +1,8 @@
+---
+name: User Story
+about: Use this template for creating new user stories.
+---
+
 **As a** [role]  
 **I need** [function]  
 **So that** [benefit]  
