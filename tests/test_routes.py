@@ -137,3 +137,65 @@ class TestAccountService(TestCase):
         """It should not Read an Account that is not found"""
         resp = self.client.get("/accounts/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_account(self):
+        """ It should update an account when valid data is provided."""
+        # create an account
+        test_account = self._create_accounts(1)[0]
+        updated_account_data = {
+            "name": "Updated Account Name", 
+            "email": "updated.email@example.com", 
+            "address": "123 Updated St", 
+            "phone_number": "1234567890",
+            "date_joined": "2022-12-31"
+        }
+
+        # update the account
+        resp = self.client.put(
+            f"{BASE_URL}/{test_account.id}",
+            json=updated_account_data,
+            content_type="application/json"
+        )
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # check the updated account
+        updated_account = resp.get_json()
+        self.assertEqual(updated_account["name"], updated_account_data["name"])
+        self.assertEqual(updated_account["email"], updated_account_data["email"])
+        self.assertEqual(updated_account["address"], updated_account_data["address"])
+        self.assertEqual(updated_account["phone_number"], updated_account_data["phone_number"])
+        self.assertEqual(updated_account["date_joined"], updated_account_data["date_joined"])
+
+    def test_update_account_not_found(self):
+        """It should return 404_NOT_FOUND when updating a non-existing account"""
+        fake_account = {"name": "Fake Account", "email": "fake@example.com", "address": "123 Fake St"}
+        response = self.client.put("/accounts/0", json=fake_account, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_account_with_invalid_data(self):
+        """It should reject the update when the account data is invalid"""
+        account_data = {
+            "name": "Test Account",
+            "email": "test@example.com",
+            "address": "Test Address"
+        }
+
+        # Create the account
+        create_resp = self.client.post(
+            "/accounts",
+            json=account_data,
+            content_type="application/json"
+        )
+        self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
+
+        account_id = create_resp.json["id"]
+
+        # Attempt to update the account with invalid data
+        new_account = {"name": 1234, "email": "invalid"}
+
+        update_resp = self.client.put(
+            f"/accounts/{account_id}",
+            json=new_account,
+            content_type="application/json"
+        )
+        self.assertEqual(update_resp.status_code, status.HTTP_400_BAD_REQUEST)

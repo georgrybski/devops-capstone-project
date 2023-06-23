@@ -5,10 +5,11 @@ This microservice handles the lifecycle of Accounts
 """
 # pylint: disable=unused-import
 from flask import jsonify, request, make_response, abort, url_for   # noqa; F401
-from service.models import Account
+from service.models import Account, db
 from service.common import status  # HTTP Status Codes
 from . import app  # Import Flask application
-
+import re
+from datetime import date
 
 ############################################################
 # Health Endpoint
@@ -85,8 +86,26 @@ def get_accounts(account_id):
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
-# ... place you code here to UPDATE an account ...
+@app.route("/accounts/<int:account_id>", methods=["PUT"])
+def update_account(account_id):
+    """
+    Update an Account
+    This endpoint will update an Account based on the body that is posted
+    """
+    app.logger.info("Request to update account with id: %s", account_id)
+    account = Account.query.get(account_id)
+    if not account:
+        abort(status.HTTP_404_NOT_FOUND, "Account with id [{}] was not found.".format(account_id))
 
+    account_data = request.get_json()
+
+    if not validate_account_data(account_data):
+        abort(status.HTTP_400_BAD_REQUEST, "Invalid account data provided.")
+
+    account.deserialize(account_data)
+    db.session.commit()
+
+    return jsonify(account.serialize()), status.HTTP_200_OK
 
 ######################################################################
 # DELETE AN ACCOUNT
@@ -110,3 +129,32 @@ def check_content_type(media_type):
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {media_type}",
     )
+
+def validate_account_data(account_data):
+    """
+    Validate the account data.
+    Returns True if the data is valid, False otherwise.
+    """
+    if not isinstance(account_data.get("name"), str):
+        return False
+    if not isinstance(account_data.get("email"), str) or not validate_email(account_data["email"]):
+        return False
+    if not isinstance(account_data.get("address"), str):
+        return False
+    if "phone_number" in account_data and not isinstance(account_data["phone_number"], str):
+        return False
+    if "date_joined" in account_data:
+        try:
+            date.fromisoformat(account_data["date_joined"])
+        except (TypeError, ValueError):
+            return False
+    return True
+
+def validate_email(email):
+    """
+    Validate an email address using regular expressions.
+
+    Returns True if the email address is valid, False otherwise.
+    """
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
