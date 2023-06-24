@@ -199,3 +199,57 @@ class TestAccountService(TestCase):
             content_type="application/json"
         )
         self.assertEqual(update_resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_account(self):
+        """It should delete an account"""
+        # Create an account
+        account_data = {
+            "name": "Test Account",
+            "email": "test@example.com",
+            "address": "Test Address"
+        }
+        create_resp = self.client.post(
+            "/accounts",
+            json=account_data,
+            content_type="application/json"
+        )
+        self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
+        account_id = create_resp.json["id"]
+
+        # Delete the account
+        delete_resp = self.client.delete(f"/accounts/{account_id}")
+        self.assertEqual(delete_resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify the account is deleted
+        get_resp = self.client.get(f"/accounts/{account_id}")
+        self.assertEqual(get_resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_non_existing_account(self):
+        """It should return 404_NOT_FOUND when deleting a non-existing account"""
+        # Delete a non-existing account
+        delete_resp = self.client.delete("/accounts/9999")
+        self.assertEqual(delete_resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_deleted_account(self):
+        """It should return 404_NOT_FOUND when deleting an already deleted account"""
+        # Create an account
+        account_data = {
+            "name": "Test Account",
+            "email": "test@example.com",
+            "address": "Test Address"
+        }
+        create_resp = self.client.post(
+            "/accounts",
+            json=account_data,
+            content_type="application/json"
+        )
+        self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
+        account_id = create_resp.json["id"]
+
+        # Delete the account
+        delete_resp = self.client.delete(f"/accounts/{account_id}")
+        self.assertEqual(delete_resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Try to delete the account again
+        delete_resp_again = self.client.delete(f"/accounts/{account_id}")
+        self.assertEqual(delete_resp_again.status_code, status.HTTP_404_NOT_FOUND)
