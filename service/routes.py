@@ -11,6 +11,7 @@ from . import app  # Import Flask application
 import re
 from datetime import date
 
+
 ############################################################
 # Health Endpoint
 ############################################################
@@ -179,3 +180,4 @@ def validate_email(email):
     """
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
+    
