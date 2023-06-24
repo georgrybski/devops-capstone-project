@@ -253,3 +253,38 @@ class TestAccountService(TestCase):
         # Try to delete the account again
         delete_resp_again = self.client.delete(f"/accounts/{account_id}")
         self.assertEqual(delete_resp_again.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_accounts(self):
+        """It should list all accounts"""
+        # Create sample accounts
+        account_data_1 = {"name": "Account 1", "email": "account1@example.com", "address": "Address 1"}
+        account_data_2 = {"name": "Account 2", "email": "account2@example.com", "address": "Address 2"}
+
+        self.client.post("/accounts", json=account_data_1, content_type="application/json")
+        self.client.post("/accounts", json=account_data_2, content_type="application/json")
+
+        # Retrieve the list of accounts
+        response = self.client.get("/accounts")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the number of accounts in the response
+        accounts = response.json
+        self.assertEqual(len(accounts), 2)
+
+        # Verify the account details
+        account_1 = accounts[0]
+        self.assertEqual(account_1["name"], account_data_1["name"])
+        self.assertEqual(account_1["email"], account_data_1["email"])
+        self.assertEqual(account_1["address"], account_data_1["address"])
+
+        account_2 = accounts[1]
+        self.assertEqual(account_2["name"], account_data_2["name"])
+        self.assertEqual(account_2["email"], account_data_2["email"])
+        self.assertEqual(account_2["address"], account_data_2["address"])
+        
+    def test_method_not_allowed(self):
+        """It should not allow an illegal method call"""
+        resp = self.client.delete(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        
