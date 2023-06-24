@@ -123,7 +123,9 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # ADD YOUR TEST CASES HERE ...
+    ######################################################################
+    #  G E T  A C C O U N T   T E S T   C A S E S
+    ######################################################################
 
     def test_get_account(self):
         """It should Read a single Account"""
@@ -137,6 +139,10 @@ class TestAccountService(TestCase):
         """It should not Read an Account that is not found"""
         resp = self.client.get("/accounts/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    ######################################################################
+    #  U P D A T E  A C C O U N T   T E S T   C A S E S
+    ######################################################################
 
     def test_update_account(self):
         """ It should update an account when valid data is provided."""
@@ -200,6 +206,10 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(update_resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    ######################################################################
+    #  D E L E T E  A C C O U N T   T E S T   C A S E S
+    ######################################################################
+
     def test_delete_account(self):
         """It should delete an account"""
         # Create an account
@@ -254,6 +264,10 @@ class TestAccountService(TestCase):
         delete_resp_again = self.client.delete(f"/accounts/{account_id}")
         self.assertEqual(delete_resp_again.status_code, status.HTTP_404_NOT_FOUND)
 
+    ######################################################################
+    #  L I S T  A C C O U N T S   T E S T   C A S E S
+    ######################################################################
+
     def test_list_accounts(self):
         """It should list all accounts"""
         # Create sample accounts
@@ -283,6 +297,10 @@ class TestAccountService(TestCase):
         self.assertEqual(account_2["email"], account_data_2["email"])
         self.assertEqual(account_2["address"], account_data_2["address"])
         
+    ######################################################################
+    #  O T H E R  T E S T   C A S E S
+    ######################################################################
+
     def test_method_not_allowed(self):
         """It should not allow an illegal method call"""
         resp = self.client.delete(BASE_URL)
