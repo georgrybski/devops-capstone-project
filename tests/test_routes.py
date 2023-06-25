@@ -22,6 +22,7 @@ BASE_URL = "/accounts"
 
 HTTPS_ENVIRON = {'wsgi.url_scheme': 'https'}
 
+
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -152,9 +153,9 @@ class TestAccountService(TestCase):
         # create an account
         test_account = self._create_accounts(1)[0]
         updated_account_data = {
-            "name": "Updated Account Name", 
-            "email": "updated.email@example.com", 
-            "address": "123 Updated St", 
+            "name": "Updated Account Name",
+            "email": "updated.email@example.com",
+            "address": "123 Updated St",
             "phone_number": "1234567890",
             "date_joined": "2022-12-31"
         }
@@ -299,7 +300,7 @@ class TestAccountService(TestCase):
         self.assertEqual(account_2["name"], account_data_2["name"])
         self.assertEqual(account_2["email"], account_data_2["email"])
         self.assertEqual(account_2["address"], account_data_2["address"])
-        
+
     ######################################################################
     #  O T H E R  T E S T   C A S E S
     ######################################################################
